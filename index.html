@@ -1,0 +1,167 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Calculadora</title>
+    <link rel="stylesheet" href="style.css"/>
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@700&display=swap" rel="stylesheet">
+
+
+  </head>
+  <body>
+    <h1>Calculadora</h1>
+    <div class="calculadora">
+        
+        <div class="display">0</div>
+
+        <button class="operador">+</button>
+        <button class="operador">-</button>
+        <button class="operador">*</button>
+        <button class="operador">/</button>
+
+        <button class="numero">7</button>
+        <button class="numero">8</button>
+        <button class="numero">9</button>
+        <button class="limpar">C</button>
+
+        <button class="numero">4</button>
+        <button class="numero">5</button>
+        <button class="numero">6</button>
+        <button></button>
+
+        <button class="numero">1</button>
+        <button class="numero">2</button>
+        <button class="numero">3</button>
+        <button></button> 
+
+        <button class="numero">0</button>
+        
+        <button class="ponto">.</button>
+        <button class="apagar">←</button>
+        <button></button>
+        <button class="igual">=</button>
+        <button></button>
+    </div>
+    
+    <script>
+      // aqui estou selecionando os elementos html
+      const display = document.querySelector('.display');
+      const botoes = document.querySelectorAll('.numero');
+      const botaoLimpar = document.querySelector('.limpar');
+      const botaoPonto = document.querySelector('.ponto');
+      const botoesOperadores = document.querySelectorAll('.operador');
+      const botaoIgual = document.querySelector('.igual');
+      const botaoApagar = document.querySelector('.apagar');
+
+      //variaveis de estado 
+      let primeiroValor = null;
+      let operador = null;
+      let esperandoSegundoValor = false;
+
+      //função de cálculo centralizado
+      function calcular(a, b, operador) {
+        if (operador === '+') return a + b;
+        if (operador === '-') return a - b;
+        if (operador === '*') return a * b;
+        if (operador === '/') {
+          if (b === 0) return "Erro";
+          return a / b;
+        }
+        return b; //aqui se nao tiver operador, só retorna o segundo valor
+      }
+
+      // aqui eu adiciono um "ouvinte de evento" para cada botão
+      botoes.forEach(botao => {
+        //aqui eu adiciono pra cada botão uma função que será executada ao ser clicado
+        botao.addEventListener('click', () => {
+          const valorBotao = botao.textContent;
+          //atualiza o display pro botao que foi digitado
+          if(esperandoSegundoValor) {
+            display.textContent = valorBotao;
+            esperandoSegundoValor = false;
+          } else if (display.textContent === '0') {
+            display.textContent = valorBotao;
+          } else {
+            display.textContent += valorBotao;
+          }
+        });
+      });
+
+      botoesOperadores.forEach(botao => {
+        botao.addEventListener('click', () => {
+          const valorBotao = botao.textContent;
+
+          //converte o valor do display para um número
+          const valorAtual = parseFloat(display.textContent);
+
+          // aqui eu checo se ja tem um primeiroValor e se nao esta esperando o segundo numero
+          if (primeiroValor != null && !esperandoSegundoValor) {
+            // faz o cálculo somente se ja digitou o segundo valor
+            primeiroValor = calcular(primeiroValor, valorAtual, operador);
+            display.textContent = primeiroValor;
+          } else if (primeiroValor == null) {
+            primeiroValor = valorAtual;
+          }
+
+          //armazena o operador clicado
+          operador = valorBotao;
+          
+          // aqui indica que a calculadora está pronta para o proximo número
+          esperandoSegundoValor = true;
+        });
+      });
+
+      botaoIgual.addEventListener('click', () => {
+        //aqui pega o valor atual do display(este será o segundo número)
+        const segundoValor = parseFloat(display.textContent);
+
+        let resultado = 0;
+
+        if(operador && primeiroValor !== null){
+          resultado = calcular(primeiroValor, segundoValor, operador);
+          display.textContent = resultado;
+          primeiroValor = resultado;
+          operador = null;
+          esperandoSegundoValor = false;
+        }
+      });
+
+      //aqui criei uma arrow function pra ver se ja contem um ponto no display
+      botaoPonto.addEventListener('click', () => {
+        if(!display.textContent.includes('.')){
+          display.textContent += '.';
+        }
+      });
+
+      botaoLimpar.addEventListener('click', () => {
+        display.textContent = 0;
+        // fazendo isso eu zero totalmente as contas anteriores quando clico em c
+        primeiroValor = null;
+        operador = null;
+        esperandoSegundoValor = false;
+      });
+
+      botaoApagar.addEventListener('click', () => {
+        //aqui eu pego o texto atual do display
+        let textoDisplay = display.textContent;
+
+        //aqui remove o último caractere da string com o método slice()
+        let novoTexto = textoDisplay.slice(0, -1);
+
+        //aqui se a string ficar vazia exibe '0' no display
+        if (novoTexto === '') {
+          display.textContent = '0';
+        } else {
+          // aqui atualiza o display com o novo texto
+          display.textContent = novoTexto;
+        }
+
+        if (!operador) {
+          primeiroValor = parseFloat(display.textContent);
+        }
+      });
+
+    </script>
+  </body>
+</html>
